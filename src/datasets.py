@@ -25,6 +25,7 @@ class KittiDataset(Dataset):
         seg_filename = os.path.join(self.root_dir, "semantic/", self.dataset_csv.iloc[index,0]);
         return_image = torch.Tensor(io.imread(image_name)/255).permute(2,0,1) #normalize image from 0-1 off the bat 
         return_seg = torch.Tensor(io.imread(seg_filename))
+        return_seg = return_seg.reshape(1,return_seg.shape[0], return_seg.shape[1]) #have to add make this 1xNxN to make torch.Resize() happy
         if(self.tranform):
             return_image = self.tranform(return_image)
             return_seg = self.tranform(return_seg)

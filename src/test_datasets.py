@@ -4,22 +4,23 @@ from torch.utils.data import DataLoader
 from torchvision import transforms, utils
 from PIL import Image
 def main():
-   # kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
-   #     transforms.Resize((1200,1200))
-   # ]))
     kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
-         transforms.CenterCrop(200)
-     ]))
-    im = 0; 
+        transforms.Resize((1200,1200))
+    ]))
+   # kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
+   #      transforms.CenterCrop(350)
+   #  ]))
     
     for(i ,( image, seg)) in enumerate(kitti):
         print(i)
-        print(image.shape)
-        print(seg.shape)
+        #print(image.shape)
+        #print(seg.shape)
         if i==10:
-            fig,ax = plt.subplots(1,2)
+            
             numpy_image = image.permute(1,2,0).numpy()
-            numpy_seg = seg.numpy()
+            numpy_seg = seg.reshape(seg.shape[1], seg.shape[2]).numpy()
+            print(numpy_seg.shape)
+            fig,ax = plt.subplots(1,2)
             ax[0].imshow((numpy_image))
             ax[1].imshow(numpy_seg)
 
