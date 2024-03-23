@@ -1,1 +1,1 @@
-# jhu_midterm
+# JHU Deep Learning for CV Mid-term Project 
