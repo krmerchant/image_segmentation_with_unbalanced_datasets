@@ -29,7 +29,7 @@ class KittiDataset(Dataset):
         return_image = torch.tensor(io.imread(image_name)/255, dtype=torch.float).permute(2, 0, 1)
         return_seg = torch.tensor(io.imread(seg_filename, as_gray=True), dtype=torch.int)
         return_seg = return_seg.long()
-        return_seg = return_seg * (return_seg > 25) 
+        return_seg = return_seg * (return_seg > 25)  #only log vehicles
 
         # have to add make this 1xNxN to make torch.Resize() happy
         return_seg = return_seg.reshape(
