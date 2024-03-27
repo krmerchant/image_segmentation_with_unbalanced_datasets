@@ -16,7 +16,8 @@ class TestUNetNetwork(unittest.TestCase):
         [images, seg] = kitti[0]
         unet = UNet(37)
         output = unet(images)
-        self.assertEqual([572, 572, 37], output.shape)
+        c,w,h = output.shape
+        self.assertEqual([37,388, 388], [c,w,h])
 
 
 if __name__ == '__main__':
