@@ -6,6 +6,7 @@ from PIL import Image
 import numpy as np
 import torch
 
+
 def main():
     kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
         transforms.Resize((256, 256))
@@ -20,7 +21,7 @@ def main():
         print(seg.shape)
         if i == 100:
             numpy_image = image.permute(1, 2, 0).numpy()
-            numpy_seg = torch.argmax(seg,dim=3)
+            numpy_seg = torch.argmax(seg, dim=3)
             numpy_seg = numpy_seg.reshape(seg.shape[1], seg.shape[2]).numpy()
             print(numpy_seg.shape)
             fig, ax = plt.subplots(1, 2)
