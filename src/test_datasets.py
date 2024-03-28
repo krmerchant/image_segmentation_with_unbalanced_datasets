@@ -9,7 +9,7 @@ import torch
 
 def main():
     kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
-        transforms.Resize((256, 256))
+        transforms.Resize((512, 512))
     ]))
    # kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
    #      transforms.CenterCrop(350)
