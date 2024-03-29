@@ -11,8 +11,9 @@ def center_crop(x, N):
 
 
 class UNet(nn.Module):
-    def __init__(self, number_classes):
+    def __init__(self, number_classes, debug=False):
         super().__init__()
+        self.debug = debug
         self.encoder1_1 = nn.Conv2d(3, 64, kernel_size=3, padding=1) #3x572x572
         self.encoder1_2 = nn.Conv2d(64, 64, kernel_size=3, padding=1) #64x572x572 (this concats accross)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2) #64x286x286
@@ -56,19 +57,25 @@ class UNet(nn.Module):
 
         # encoders
         x_e11 = relu(self.encoder1_1(x))
-        print(f"{x_e11.shape=}")
+        if self.debug: print(f"{x_e11.shape=}")
         x_e12 = relu(self.encoder1_2(x_e11))
-        print(f"{x_e12.shape=}")
+        if self.debug: print(f"{x_e12.shape=}")
         x_pool1 = self.pool1(x_e12)
-        print(f"{x_pool1.shape=}")
+        if self.debug: print(f"{x_pool1.shape=}")
         x_e21 = relu(self.encoder2_1(x_pool1))
+        if self.debug: print(f"{x_e21.shape=}")
         x_e22 = relu(self.encoder2_2(x_e21))
+        if self.debug: print(f"{x_e22.shape=}")
         x_pool2 = self.pool2(x_e22)
-
+        if self.debug: print(f"{x_pool2.shape=}")
+        
         x_e31 = relu(self.encoder3_1(x_pool2))
+        if self.debug: print(f"{x_e31.shape=}")
         x_e32 = relu(self.encoder3_2(x_e31))
+        if self.debug: print(f"{x_e32.shape=}")
         x_pool3 = self.pool3(x_e32)
-
+        if self.debug: print(f"{x_pool3.shape=}")
+        
         x_e41 = relu(self.encoder4_1(x_pool3))
         x_e42 = relu(self.encoder4_2(x_e41))
         x_pool4 = self.pool4(x_e42)
@@ -78,10 +85,11 @@ class UNet(nn.Module):
 
         # decoder
 
-        print(f"{x_e52.shape=}")
+        if self.debug: print(f"{x_e52.shape=}")
         xup1 = self.upconv1(x_e52)
-        print(f"{xup1.shape=}")
+        if self.debug: print(f"{xup1.shape=}")
         xcc1 = torch.cat([xup1, x_e42], dim=0)
+        if self.debug: print(f"{xcc1.shape=}")
         xd11 = relu(self.decoder1_1(xcc1))
         xd12 = relu(self.decoder1_2(xd11))
 
