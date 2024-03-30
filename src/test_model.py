@@ -22,12 +22,13 @@ class TestUNetNetwork(unittest.TestCase):
 
     def test_loss_computation(self):
         '''Just test that we can pass in a batch-like torch array'''
-        unet = UNet(37,debug=False)
+        unet = UNet(2,debug=False)
         criterion =  nn.CrossEntropyLoss()
         images = torch.ones(2,3,512,512)
         labels = torch.ones(2,512,512).long()
 
         output = unet(images)
+        print(output)
         loss = criterion(output,labels) 
         print(loss.item())
         self.assertIsNotNone(loss.item()) ##is the loss of the right dims
@@ -36,10 +37,10 @@ class TestUNetNetwork(unittest.TestCase):
         unet = UNet(1,debug=False)
         criterion =  nn.CrossEntropyLoss()
         images = torch.zeros(2,3,512,512)
-        labels = torch.ones(2,1,512,512)
-
+        labels = torch.ones(2,1,512,512).float()
+        
         output = unet(images)
-        print(output.shape)
+        print(output)
         loss = criterion(output,labels) 
         print(loss.item())
         self.assertIsNotNone(loss.item()) ##is the loss of the right dims

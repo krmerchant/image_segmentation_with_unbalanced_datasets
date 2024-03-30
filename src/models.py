@@ -54,6 +54,8 @@ class UNet(nn.Module):
             64, number_classes, kernel_size=1)  # 1x1 convolution
         if(number_classes == 1):
             self.sig_out = nn.Sigmoid()
+        else:
+            self.soft_max_out = nn.Softmax2d()
     def forward(self, x):
         """ forward pass of network"""
 
@@ -118,6 +120,8 @@ class UNet(nn.Module):
         #clamp to prob 
         if(self.number_classes == 1):
             if self.debug: print("output")
-            output = self.sig_out(output).float()
+            output = self.sig_out(output)
+        else:
+            output = self.soft_max_out(output)
 
         return output
