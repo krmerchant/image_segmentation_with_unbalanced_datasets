@@ -32,11 +32,9 @@ class KittiDataset(Dataset):
         return_seg = torch.tensor(
             io.imread(seg_filename, as_gray=True), dtype=torch.int)
   
-        print(f"{return_seg=}")
-        #if(self.car_only):
-        return_seg = (return_seg == 26)  # only log vehicles
+        if(self.car_only):
+            return_seg = (return_seg == 26)  # only log vehicles
         return_seg = return_seg.long()
-        print(f"{return_seg=}")
         # have to add make this 1xNxN to make torch.Resize() happy
         return_seg = return_seg.reshape(
             1, return_seg.shape[0], return_seg.shape[1])
