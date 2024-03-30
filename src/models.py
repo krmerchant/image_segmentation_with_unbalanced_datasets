@@ -14,6 +14,7 @@ class UNet(nn.Module):
     def __init__(self, number_classes, debug=False):
         super().__init__()
         self.debug = debug
+        self.number_classes = number_classes
         self.encoder1_1 = nn.Conv2d(3, 64, kernel_size=3, padding=1) #3x572x572
         self.encoder1_2 = nn.Conv2d(64, 64, kernel_size=3, padding=1) #64x572x572 (this concats accross)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2) #64x286x286
@@ -51,7 +52,8 @@ class UNet(nn.Module):
 
         self.seg_out = nn.Conv2d(
             64, number_classes, kernel_size=1)  # 1x1 convolution
-
+        if(number_classes == 1):
+            self.sig_out = nn.Sigmoid()
     def forward(self, x):
         """ forward pass of network"""
 
@@ -113,4 +115,9 @@ class UNet(nn.Module):
         xd42 = relu(self.decoder4_2(xd41))
 
         output = self.seg_out(xd42)
+        #clamp to prob 
+        if(self.number_classes == 1):
+            if self.debug: print("output")
+            output = self.sig_out(output).float()
+
         return output
