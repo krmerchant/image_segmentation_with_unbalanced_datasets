@@ -8,14 +8,13 @@ import torch
 
 
 def main():
-    kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training', transforms.Compose([
-        transforms.Resize((512, 512))
-    ])) 
+    kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training',car_only=True, transform=transforms.Compose([transforms.Resize((512, 512))])) 
     for (i, (image, seg)) in enumerate(kitti):
         print(i)
         print(image.shape)
         print(seg.shape)
         if i == 100:
+            print(image)
             numpy_image = image.permute(1, 2, 0).numpy()
             numpy_seg = seg.reshape(seg.shape[1], seg.shape[2]).numpy()
             print(numpy_seg.shape)

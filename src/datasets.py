@@ -8,10 +8,11 @@ import torch.nn.functional as F
 
 
 class KittiDataset(Dataset):
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, csv_file, root_dir, car_only=False, transform=None):
         self.root_dir = root_dir
         self.dataset_csv = pd.read_csv(os.path.join(self.root_dir, csv_file))
         self.transform = transform
+        self.car_only  = car_only
 
     def __len__(self):
         return len(self.dataset_csv)
@@ -30,9 +31,12 @@ class KittiDataset(Dataset):
             io.imread(image_name)/255, dtype=torch.float).permute(2, 0, 1)
         return_seg = torch.tensor(
             io.imread(seg_filename, as_gray=True), dtype=torch.int)
+  
+        print(f"{return_seg=}")
+        #if(self.car_only):
+        return_seg = (return_seg == 26)  # only log vehicles
         return_seg = return_seg.long()
-        #return_seg = return_seg * (return_seg > 25)  # only log vehicles
-
+        print(f"{return_seg=}")
         # have to add make this 1xNxN to make torch.Resize() happy
         return_seg = return_seg.reshape(
             1, return_seg.shape[0], return_seg.shape[1])
