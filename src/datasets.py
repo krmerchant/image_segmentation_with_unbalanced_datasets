@@ -33,7 +33,7 @@ class KittiDataset(Dataset):
             io.imread(seg_filename, as_gray=True), dtype=torch.int)
   
         if(self.car_only):
-            return_seg = (return_seg == 7)  # only log vehicles
+            return_seg = (return_seg == 26)  # only log vehicles
         return_seg = return_seg.long()
         # have to add make this 1xNxN to make torch.Resize() happy
         return_seg = return_seg.reshape(
