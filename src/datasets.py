@@ -39,5 +39,4 @@ class KittiDataset(Dataset):
         if (self.transform):
             return_image = self.transform(return_image)
             return_seg = self.transform(return_seg)
-        one_hot_rep = F.one_hot(return_seg, 37)
-        return return_image, one_hot_rep
+        return return_image, return_seg
