@@ -8,9 +8,11 @@ class DoubleConv(nn.Module):
     def __init__(self, input_channels, out_channels, debug=False):
         super().__init__()
         self.double_conv = nn.Sequential(
-            nn.Conv2d(input_channels, out_channels, kernel_size=3,padding=1),
+            nn.Conv2d(input_channels, out_channels, kernel_size=3,padding=1, bias=False),
+            nn.BatchNorm2d(num_features=out_channels), 
             nn.ReLU(), 
-            nn.Conv2d(out_channels, out_channels, kernel_size=3,padding=1),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3,padding=1, bias=False),
+            nn.BatchNorm2d(num_features=out_channels), 
             nn.ReLU() ,
         )
     def forward(self,x):
