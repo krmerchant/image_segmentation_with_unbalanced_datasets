@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics as  metrics
 import matplotlib.pyplot as plt
+import torch
 
 class LossTracker():
     def __init__(self):
