@@ -48,4 +48,4 @@ class GroundTruthStatsClass:
   def get_pr_numbers(self):
     return metrics.precision_recall_curve(self.y_true, self.y_pred)
   def get_roc_numbers(self):
-    return metrics.roc_curve(self.y_true, self.y_pred
+    return metrics.roc_curve(self.y_true, self.y_pred)
