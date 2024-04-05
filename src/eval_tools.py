@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 class LossTracker():
     def __init__(self):
         self.losses = {'train': [], 'validation': [], 'validation_accuracy': []}
@@ -15,3 +17,9 @@ class LossTracker():
     def reset(self):
         self.losses = {'train': [], 'validation': []}
 
+    def plot_loss_curves(self):
+        fig, ax = plt.subplots()
+        plt.grid()
+        ax.plot(self.losses['train'], label='train loss')
+        ax.plot(self.losses['validation'], label='validation_loss')
+        ax.legend()
