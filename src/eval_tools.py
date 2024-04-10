@@ -3,10 +3,16 @@ import numpy as np
 import sklearn.metrics as  metrics
 import matplotlib.pyplot as plt
 import torch
+import pickle
 
 class LossTracker():
     def __init__(self):
         self.losses = {'train': [], 'validation': [], 'validation_accuracy': []}
+
+    def load_losses_from_file(self, loss_file_path):
+        with open(loss_file_path, "rb") as myFile:
+            self.losses = pickle.load(myFile)
+
 
     def add_loss(self, loss_type, loss):
         if loss_type not in self.losses:
