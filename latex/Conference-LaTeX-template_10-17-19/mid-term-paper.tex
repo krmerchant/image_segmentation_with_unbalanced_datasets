@@ -31,7 +31,7 @@ This paper explores a binary semantic segmentation problem in the context of urb
 \end{abstract}
 
 \begin{IEEEkeywords}
-component, formatting, style, styling, insert
+semantic segmentation, deep learning, u-net, urban driving, robotics
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -40,10 +40,11 @@ The area of urban driving is a really important one especially with the rise of 
 
 \subsection{Semantic Segmentation for Urban Driving}
 
-	u
+Semantic segmentation has been used extensively in the context of urban driving.
+	
 
 \subsection{Resolving Class Imbalance}
-The first is working with unbalanced datasets. In the context of urban scenes, the semantic label space is pretty large. Segmentation algorithms have to interact with roads, poles, signs, cars, sometimes horse-drawn carriage \cite{b2}. While cars are a common occurance in images, they take up a smaller proportion of samples in the context of binary segmentation. Furthermore, their frequency is largly governed by other external factors such as time of day, weather conditions, etc. Continuous obstacles such as road ways and such are far less challenging to detect and segment due to their consitency in most urban environments. In the Kitti dataset, the dataset I used for training and evaluation, car's take up approximately 5 percent of the data. If we don't account for this in training our model, our model will learn to produce segmentation masks which produce good general accuracy metrics, but sub-optimal performace on the class of interest. An example of this would be the situation where the network might predict a segmentation mask of "not-car". In this case, the accuracy might be high, but the class-specific accuracy will be poor (ie. failure to predit the object of interest: the pixels assoiciated to car). This problem has been a topic of concern in the medical imaging space. In this context, the segmentation masks can potentially be small and localized to different portions of a sample. In the context of tumor segmentation for example, tumors can have varying shapes, sizes and locations within a 3D volume. Furthermore, tumors generally take up a smaller portion of the brain than unaffected brain matter. As such, many researchers in this space have attempted to address these issues, by designing loss functions which weight positive examples more than the negative ones.Milletari \cite{b1} propose using a DICE loss, which is similar to Insersection over Union (IoU) loss. For segmentation problems in the multi-label space domain, researchers can weigh certain labels more or less depending on their frequency. Unet  \textbf{CITATION} does this by using a Wighted Cross Entropy for their training loss. 
+The first is working with unbalanced datasets. In the context of urban scenes, the semantic label space is pretty large. Segmentation algorithms have to interact with roads, poles, signs, cars, sometimes horse-drawn carriage \cite{b2}. While cars are a common occurance in images, they take up a smaller proportion of samples in the context of binary segmentation. Furthermore, their frequency is largly governed by other external factors such as time of day, weather conditions, etc. Continuous obstacles such as road ways and such are far less challenging to detect and segment due to their consitency in most urban environments. In the KITTI dataset, the dataset I used for training and evaluation, car's take up approximately 5 percent of the data. If we don't account for this in training our model, our model will learn to produce segmentation masks which produce good general accuracy metrics, but sub-optimal performace on the class of interest. An example of this would be the situation where the network might predict a segmentation mask of "not-car". In this case, the accuracy might be high, but the class-specific accuracy will be poor (ie. failure to predit the object of interest: the pixels assoiciated to car). This problem has been a topic of concern in the medical imaging space. In this context, the segmentation masks can potentially be small and localized to different portions of a sample. In the context of tumor segmentation for example, tumors can have varying shapes, sizes and locations within a 3D volume. Furthermore, tumors generally take up a smaller portion of the brain than unaffected brain matter. As such, many researchers in this space have attempted to address these issues, by designing loss functions which weight positive examples more than the negative ones. Milletari \cite{b1} propose using a DICE loss, which is similar to Insersection over Union (IoU) loss. For segmentation problems in the multi-label space domain, researchers can weigh certain labels more or less depending on their frequency. U-Net \cite{unet} does this by using a Weighted Cross Entropy for their training loss for the multi-class segmentation problem. In reference \cite{unet} -- as well as other networks which make use of class-specfic weight hyperparameters  -- the weights are set inversely proportional to their frequency in the ground truth data. That means classes with high-freqency will contribute to a smaller value in the loss as compared to their minority-class counterparts. During training, this means that we will adjust our weights "less" in the face of majority-class observations. 
 
 
 
@@ -65,29 +66,33 @@ I made a few modifications to help with training and testing. The input image fo
 
 \subsection{Loss Functions}
 
-To address the binary segmentation problem, I experimented with 3 different loss functions: Binary Cross Entropy (BCE), DICE, and a modified version of DICE where I dropped the negative example term. Sudre, C.H., et al. \cite{gen-dice} refer to these losses. Let $r_i$ define a ground truth pixel in the semantic map. Let $p_i$ represent a pixel in the predicted semantic map. I define the BCE loss as: 
+To address the binary segmentation problem, I experimented with 3 different loss functions: Binary Cross Entropy (BCE), DICE, and a modified version of DICE where I dropped the negative example term. Sudre, C.H., et al. \cite{gen-dice} refer to these losses. Let $r_i$ define a ground truth pixel in the semantic map. Let $p_i$ represent a pixel in the predicted semantic map. I define the BCE loss as: \\
+
 
 \begin{equation}
 -\frac{1}{N} \sum_N r_ilog(p_n) + (1 - r_n)log(1 -p_n)
 \end{equation}
 
-The DICE loss as:
+The DICE loss as:\\
+
 
 \begin{equation}
 1 -\frac{\sum_{i=0}^N p_nr_n + \epsilon}{\sum_{i=0}^N  p_n + r_n + \epsilon} - \frac{\sum_{i=0}^N  (1 - p_n)(1 - r_n)}{\sum_{i=0}^N  2 - p_n - r_n +\epsilon}
 \end{equation}
 
-And the "modified" DICE loss
+And the "modified" DICE loss\\
+
 
 \begin{equation}
 1 -\frac{\sum_{i=0}^N p_nr_n + \epsilon}{\sum_{i=0}^N  p_n + r_n + \epsilon} 
-\end{equation}
+\end{equation}\\
+
 
 The last function was one that came up with. Due to the severe imbalance in the dataset (which will be covered in the Datasets section), I wanted to see would happen if we got rid of the term associated with the background class. In any case, BCE in theory is less suited for imbalanced class problems compared to the overlap-based losses. This comes from the denominator of the loss. While BCE focuses on raw numbers of positive and negative samples, the DICE losses normalize their errors based on the frequency of the classes.  	
 
 \subsection{Datasets}
 
-For this paper, I used two dataset. The first was the Kitti \cite{kitti} dataset. This comprised of 200 images along with semantic maps. The semantic label space consist of 33 different classes. These classes consist of items such as cars, poles, road, etc. For this assignment, I decided to focus strictly on cars detections. One difficult of working with this dataset was that each image had a slightly different size. The dimensions were roughly 1200x375. To normalize the image size, I resized each image and corresponding segmentation mask to a 265x265 patch. Learning and inferencing on images of this size was useful. I was able to achieve good training speed all while maintaining decent performance. I applied a standard 80-10-10 split on the 200 images to generate samples. After converting the multi-class dataset into a binary segmentation one, I computed the proportion of "car" pixels to "non-car" pixels as 0.067. This low value clearly points to a high degree of binary class imbalance. 
+For this paper, I used two dataset. The first was the KITTI \cite{kitti} dataset. This comprised of 200 images along with semantic maps. The semantic label space consist of 33 different classes. These classes consist of items such as cars, poles, road, etc. For this assignment, I decided to focus strictly on cars detections. One difficult of working with this dataset was that each image had a slightly different size. The dimensions were roughly 1200x375. To normalize the image size, I resized each image and corresponding segmentation mask to a 265x265 patch. Learning and inferencing on images of this size was useful. I was able to achieve good training speed all while maintaining decent performance. I applied a standard 80-10-10 split on the 200 images to generate samples. After converting the multi-class dataset into a binary segmentation one, I computed the proportion of "car" pixels to "non-car" pixels as 0.067. This low value clearly points to a high degree of binary class imbalance. 
 
 \subsection{Training}
 
@@ -100,7 +105,7 @@ For training, I used a standard SGD optimizer with a momentum of 0.9 with an ini
 
 \subsection{Training on KITTI Semanitic Segmentation Dataset}
 
-In general, all the models seems to converge reasonably well as seen in Figues \ref{bce-loss}, \ref{dice-mod-loss} and \ref{dice-og-loss}. I noticed that there are some "jagged portions" in the validation loss around the 150-200 epoch range that leads into a plateu. This plateu seemed to occur directly after the loss was lowered by the scheduler. This leads me to believe that it potentially had to do with our optimizer continually missing the local minima (ie. underfitting due too large of a learning rate).
+In general, all the models seems to converge reasonably well as seen in Figures \ref{bce-loss}, \ref{dice-mod-loss} and \ref{dice-og-loss}. I noticed that there are some "jagged portions" in the validation loss around the 150-200 epoch range that leads into a plateau. This plateau seemed to occur directly after the loss was lowered by the scheduler. This leads me to believe that it potentially had to do with our optimizer continually missing the local minima (ie. underfitting due too large of a learning rate) at the previously higher learning rate.  
 
 
 \begin{figure}[htbp]
@@ -127,9 +132,13 @@ In general, all the models seems to converge reasonably well as seen in Figues \
 
 
 \subsection{Evaluation on KITTI Dataset}
+ 
+ 
 
+Overall, the model performed well on the KITTI test dataset. Using the AUC measure (See in Figure \ref{pr-curve}) of the PR curve, the ranking favors DICE original, followed by DICE "Modified" and then BCE. This fits my theoretical understanding of learning on unbalanced datasets—the performance delta between BCE and DICE "mod" is much larger than the distance between DICE "mod" and DICE "original", indicating that the overlap-based approach work better than the raw-frequency-based loss approach. What is interesting is that the DICE "mod" loss does not perform as well as the original DICE loss. This might be because the "negative class" term in the DICE loss acts as a form of regularization. If we only learn features which fit only positive examples, then we may over-fit to positive examples in the data.  
+\\
 
-Overall the model performed well on the KITTI test dataset. Using the AUC measure (See in Figure \ref{pr-curve}) of the PR curve, the ranking seems to favor DICE original, followed by DICE "Modified" and then BCE. This makes sense as DICE has proven to be a better loss to deal with class imbalance. The delta between BCE and DICE "Mod" is much larger than the distance between DICE "Mod" and DICE "Original", indiciating that the overlap based approach work better than the raw-frequency-based loss approach. 
+Figures \ref{kitti-sample-1-bce}, \ref{kitti-sample-1-dice-mod} and \ref{kitti-sample-1-dice-og} show qualitiative examples of each model on a specific test image where the class-imbalance is particuarily high. In this case, there are 3 cars that are all closely compact wrt. eachoother. The most interest observation to note is that there's a clear false positive in the BCE model in the $x \in [0, 10]$ and $y \in [120, 130]$ range that isn't in the other model outputs. This is an example of the BCE-trained model not being able to correctly learn the features associated to the miniority class in the semantic segmentation problem
 
 
 \begin{figure}[htbp]
@@ -140,11 +149,72 @@ Overall the model performed well on the KITTI test dataset. Using the AUC measur
 
 
 
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.35]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_1-gt.png}}
+\caption{Qualitative Sample 1 KITTI Test Dataset. Real sample overlayed with GT binary mask.}
+\label{kitti-sample-1-gt}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.35]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_1-bce.png}}
+\caption{Qualitative Sample 1 KITTI Test Dataset. BCE-trained model.}
+\label{kitti-sample-1-bce}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.35]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_1-dice-mod.png}}
+\caption{Qualitative Sample 1 KITTI Test Dataset. DICE "mod"-trained model.}
+\label{kitti-sample-1-dice-mod}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.35]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_1-dice-og.png}}
+\caption{Qualitative Sample 1 KITTI Test Dataset. DICE "original"-trained model.}
+\label{kitti-sample-1-dice-og}
+\end{figure}
 
 
 
 
 \subsection{Evaluation on Custom "DC Commute" Dataset}
+
+
+Unfortunately the model didn't scale very well to the hand-acquired dataset I put together. This most likely has to do with the fact that the model was only trained on 200 images with no data augmentation. It would be wise to augment the model by programmatically changing the exposure of the training sample to increase the dataset size. That said, the model results on the test datasets do show some capability of scalable performance. Figures \ref{dc-sample-1-bce} and \ref{dc-sample-1-dice-mod} and \ref{dc-sample-1-dice-og} show the results of the segmentation networks on the test image seen in Figure \ref{dc-sample-1-input}. For these output mask, I didn't threshold based on optimal PR result. Instead I plotting the mask as a heat-map of raw binary probabilities on top of the original image. Here more red means more "car-like" and blue mean more "not-car-like". In all these model outputs', it seems like the models are able to detect the backs of cars towards the left side of the image center. 
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.50]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/dc-commute-test/test_sample_new-input.png}}
+\caption{Test sample from "DC Commute" dataset}
+\label{dc-sample-1-input}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.50]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/dc-commute-test/test_sample_new-bce.png}}
+\caption{Qualitative Sample 1 "DC Commute" Test Dataset. BCE-trained model. }
+\label{dc-sample-1-bce}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.50]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/dc-commute-test/test_sample_new-dice-mod.png}}
+\caption{Qualitative Sample 1 "DC Commute" Test Dataset. DICE "mod"-trained model.}
+\label{dc-sample-1-dice-mod}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+\leftline{\includegraphics[scale=0.50]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/dc-commute-test/test_sample_new-dice-og.png}}
+\caption{Qualitative Sample 1 KITTI Test Dataset. DICE "original"-trained model.}
+\label{dc-sample-1-dice-og}
+\end{figure}
+
 
 
 
@@ -153,38 +223,21 @@ Overall the model performed well on the KITTI test dataset. Using the AUC measur
 These experiments have shown a few important concepts about training segmentation models. 1) Designing a loss function that works with your data is extremely important. If your data is severly imbalanced, choosing an overlap-based loss function is a viable solution to working with this deficinecy. 2) It is important to training your model with a sufficient amount of data. Based on the results of a KITTI-training U-Net on a custom dataset, your training data must capture various different aspects inorder to be properly scalable. This includes lighting conditions, type of camera, resolution of camera, etc. 
 
 
-
-
-
-\begin{figure}[htbp]
-\leftline{\includegraphics[scale=0.25]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_1.png}}
-\caption{Qualitative Sample 1 KITTI Test Dataset.}
-\label{kitti-sample-1}
-\end{figure}
-
-
-\begin{figure}[htbp]
-\leftline{\includegraphics[scale=0.25]{/home/komelmerchant/Desktop/JHUCourseTracking/DeepLearningForCV/homeworks/jhu_midterm/figures/class-imbalance/test_sample_2.png}}
-\caption{Qualitative Sample 2 KITTI Test Dataset.}
-\label{kitti-sample-2}
-\end{figure}
-
-
-
 \section*{Acknowledgment}
-
-N/A
+The open source KITTI \cite{kitti} dataset proved to be very useful when training my model. Since the dataset was very popular, there are many resources and forms of documentation with interacting with the dataset. I would also like to thank Professor Nasser Nasrabadi for answering all of my \textbf{many, many}  email questions on this project in an extremely prompt manner :) 
 
 \begin{thebibliography}{00}
-\bibitem{b1} Brosch, T., Yoo, Y., Tang, L.Y., Li, D.K., Traboulsee, A., Tam, R.: Deep convo-
-lutional encoder networks for multiple sclerosis lesion segmentation. In: MICCAI
+\bibitem{unet} Ronneberger, O., Fischer, P. & Brox, T. U-net: Convolutional networks for biomedical image segmentation. International  Conference  On  Medical  Image  Computing And  Computer-assisted  Intervention.  pp.  234-241 (2015)
+
+\bibitem{b1} Brosch, T., Yoo, Y., Tang, L.Y., Li, D.K., Traboulsee, A., Tam, R.: Deep convolutional encoder networks for multiple sclerosis lesion segmentation. In: MICCAI
 2015. pp. 3–11. Springer (2015)
-Andreas Geiger, Philip Lenz, and Raquel Urtasun.  Are weready for autonomous driving?   the kitti vision benchmarksuite. In2012 IEEE conference on computer vision and pat-tern recognition, pages 3354–3361. IEEE, 2012.
+
 \bibitem{gen-dice} Sudre, C.H., Li, W., Vercauteren, T., Ourselin, S., Jorge Cardoso, M.: GeneralisedDice overlap as a deep learning loss function for highly unbalanced segmentations.Lecture Notes in Computer Science (including subseries Lecture Notes in ArtificialIntelligence and Lecture Notes in Bioinformatics)10553 LNCS, 240–248 (2017).
 
 \bibitem{kitti} Andreas Geiger, Philip Lenz, and Raquel Urtasun.  Are weready for autonomous driving?   the kitti vision benchmarksuite. In2012 IEEE conference on computer vision and pat-tern recognition, pages 3354–3361. IEEE, 2012.
 
 \bibitem{b2} https://www.reddit.com/r/technology/comments/wt89lv/video_appears_to_show_a_teslas_autopilot_system/
+
 
 
 \end{thebibliography}
