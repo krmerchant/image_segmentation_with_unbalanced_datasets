@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import unittest
 import pytest
+import torch.nn.functional as F
+
 class TestKittiDatasetLoader(unittest.TestCase):
 
     def test_basic_dataset(self):
@@ -41,5 +43,15 @@ class TestKittiDatasetLoader(unittest.TestCase):
         print("Sucessfully interated through batches!")
 
 
+    def test_one_hot_batch(self):
+        kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training',car_only=False, transform=transforms.Compose([transforms.Resize((512, 512))])) 
+
+        data_loader = DataLoader(kitti, batch_size=2, shuffle=True)
+        for batch in data_loader:
+            _, labels = batch
+            labels = F.one_hot(labels, num_classes=34)
+            labels = torch.squeeze(labels, dim=1)
+            [b,w,h,c]  = labels.shape 
+            self.assertEqual([512,512,34], [w,h,c])
 if __name__ == "__main__":
     unittest.main()

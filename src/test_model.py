@@ -10,7 +10,18 @@ class TestUNetNetwork(unittest.TestCase):
     def test_construction(self):
         unet = UNet(50)
 
-  
+
+ 
+    def test_pass_batch_multiclass(self):
+        """test to make sure we can pass in a batch and get an the expected value"""
+        images = torch.ones(2,3,512,512)
+        unet = UNet(34,debug=False)
+        
+        output = unet(images)
+        b,c,w,h = output.shape
+        self.assertEqual([2,34,512, 512], [b,c,w,h])
+
+
     def test_pass_batch(self):
         """test to make sure we can pass in a batch and get an the expected value"""
         images = torch.ones(2,3,512,512)
