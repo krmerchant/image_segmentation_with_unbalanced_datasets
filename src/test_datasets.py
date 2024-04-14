@@ -5,35 +5,41 @@ from torchvision import transforms, utils
 from PIL import Image
 import numpy as np
 import torch
+import unittest
+import pytest
+class TestKittiDatasetLoader(unittest.TestCase):
 
+    def test_basic_dataset(self):
+        kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training',car_only=False, transform=transforms.Compose([transforms.Resize((512, 512))])) 
+        for (i, (image, seg)) in enumerate(kitti):
+            #if i == 100:
+            #    print(image)
+            #    numpy_image = image.permute(1, 2, 0).numpy()
+            #    numpy_seg = seg.reshape(seg.shape[1], seg.shape[2]).numpy()
+            #    print(numpy_seg.shape)
+            #    fig, ax = plt.subplots(1, 2)
+            #    ax[0].imshow((numpy_image))
+            #    seg_map = ax[1].imshow(numpy_seg)
+            #    fig.colorbar(seg_map)
+            #    print(numpy_seg)
+            c, h, w = image.shape
+            c_seg, h_seg, w_seg = seg.shape
+            self.assertEqual([3,512,512], [c, h, w])
+            self.assertEqual([1,512,512], [c_seg, h_seg, w_seg])
 
-def main():
-    kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training',car_only=True, transform=transforms.Compose([transforms.Resize((512, 512))])) 
-    for (i, (image, seg)) in enumerate(kitti):
-        print(i)
-        print(image.shape)
-        print(seg.shape)
-        if i == 100:
-            print(image)
-            numpy_image = image.permute(1, 2, 0).numpy()
-            numpy_seg = seg.reshape(seg.shape[1], seg.shape[2]).numpy()
-            print(numpy_seg.shape)
-            fig, ax = plt.subplots(1, 2)
-            ax[0].imshow((numpy_image))
-            seg_map = ax[1].imshow(numpy_seg)
-            fig.colorbar(seg_map)
-            print(numpy_seg)
+    def test_data_loader_multi_lable(self):        
+        kitti = KittiDataset('dataset.csv', '../data/kitti_semantic/training',car_only=False, transform=transforms.Compose([transforms.Resize((512, 512))])) 
+        unique_labels = torch.tensor([])
+        data_loader = DataLoader(kitti, batch_size=2, shuffle=True)
+        for batch in data_loader:
+            inputs, labels = batch  # Assuming each batch returns inputs and labels
+            unique_labels = torch.cat([torch.unique(labels), unique_labels],0);
+            unique_labels = torch.unique(unique_labels)
 
-    data_loader = DataLoader(kitti, batch_size=32, shuffle=True)
-    for batch in data_loader:
-        print("Got a Batch")
-        inputs, labels = batch  # Assuming each batch returns inputs and labels
-        print(inputs.shape)
-        print(labels.shape)
-       # Your training/evaluation loop
-    print("Sucessfully interated through batches!")
-    plt.show()
+        self.assertEqual(unique_labels.shape[0], 34)
+           # Your training/evaluation loop
+        print("Sucessfully interated through batches!")
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

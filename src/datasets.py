@@ -34,6 +34,11 @@ class KittiDataset(Dataset):
   
         if(self.car_only):
             return_seg = (return_seg == 26)  # only log vehicles
+
+        ##remap to labels that I want
+
+
+
         return_seg = return_seg.long()
         # have to add make this 1xNxN to make torch.Resize() happy
         return_seg = return_seg.reshape(
