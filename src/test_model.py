@@ -1,4 +1,5 @@
 from models import UNet
+from models import AttentionUNet
 import unittest
 from datasets import KittiDataset
 from torchvision import transforms, utils
@@ -11,7 +12,20 @@ class TestUNetNetwork(unittest.TestCase):
         unet = UNet(50)
 
 
+
+
+
+
  
+    def test_pass_batch_multiclass_attention_unet(self):
+        """test to make sure we can pass in a batch and get an the expected value"""
+        images = torch.ones(2,3,512,512)
+        unet = AttentionUNet(34,debug=False)
+        output = unet(images)
+        b,c,w,h = output.shape
+        self.assertEqual([2,34,512, 512], [b,c,w,h])
+
+
     def test_pass_batch_multiclass(self):
         """test to make sure we can pass in a batch and get an the expected value"""
         images = torch.ones(2,3,512,512)
