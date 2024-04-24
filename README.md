@@ -1,4 +1,4 @@
-# JHU Deep Learning for CV Mid-term Project 
+# JHU Deep Learning for CV Midterm + Final Project 
 ----
 
 
