@@ -6,5 +6,5 @@ This repo contains all the code associated to the mid-term project in JHU Deep L
 
 * Class Imbalance Analysis: ```JHU_Mid_Term_Class_Imbalance.ipynb```
 * "DC Commute Analysis: ```JHUMidTerm_LocationEvaluation.ipynb```
-
+* "Final Project -- Muliclass segmentation: ```JHU_Final-multi-class-seg.ipynb```
 
